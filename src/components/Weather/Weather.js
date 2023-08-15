@@ -63,6 +63,16 @@ export default function Home() {
   function report(state) {
     console.log(`Permission ${state}`);
   }
+  function formatDateTime(date) {
+    function padFormat(number) {
+      return String(number).padStart(2, "0");
+    }
+    return `${padFormat(date.getDate())}/${padFormat(
+      date.getMonth()
+    )}/${date.getFullYear()} - ${
+      weekday[new Date(weather.location.localtime).getDay()]
+    } - ${padFormat(date.getHours())}:${padFormat(date.getMinutes())}`;
+  }
 
   const weekday = [
     "Sunday",
@@ -85,11 +95,7 @@ export default function Home() {
               <p>
                 {weather.location.name} - {weather.location.country}
               </p>
-              <p>
-                {`${date.getDate()}/${date.getMonth()}/${date.getFullYear()} - ${
-                  weekday[new Date(weather.location.localtime).getDay()]
-                } - ${date.getHours()}:${date.getMinutes()}`}
-              </p>
+              <p>{formatDateTime(date)}</p>
               <p>{weather.current.condition.text}</p>
               <p>Umidade em {weather.current.humidity}%</p>
               <p>Precipitação {weather.current.precip_mm}mm</p>
