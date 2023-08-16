@@ -1,9 +1,15 @@
 "use client";
 import { getWeatherForecast, getUserIp } from "../../actions/api/api";
 import React from "react";
-import WeatherIcon from "../WeatherIcon/WeatherIcon";
+import SelectedWeather from "../SelectedWeather/SelectedWeather";
+import {
+  generateSelectedWeather,
+  generateWeekWeather,
+} from "@/actions/helpers/weatherFactory";
 export default function Home() {
   const [weather, setWeather] = React.useState(null);
+  const [selectedWeather, setSelectedWeather] = React.useState(null);
+  const [weekForecast, setWeekForecast] = React.useState(null);
   const [date, setDate] = React.useState(null);
   const getIp = async () => {
     try {
@@ -18,6 +24,13 @@ export default function Home() {
     try {
       let response = await getWeatherForecast(ip);
       setWeather(response.data);
+      setWeekForecast(generateWeekWeather(response.data.forecast.forecastday));
+      setSelectedWeather(
+        generateSelectedWeather(
+          response.data.forecast.forecastday[0],
+          response.data.location
+        )
+      );
       setDate(new Date(response.data.location.localtime));
       console.log("WEATHER RESPONSE:", response);
     } catch (e) {
@@ -34,7 +47,7 @@ export default function Home() {
   }, []);
 
   function handlePermission() {
-    navigator.permissions.query({ name: "geolocation" }).then((result) => {
+    navigator.permissions.request({ name: "geolocation" }).then((result) => {
       if (result.state === "granted") {
         report(result.coords);
         navigator.geolocation.getCurrentPosition(async ({ coords }) => {
@@ -63,45 +76,11 @@ export default function Home() {
   function report(state) {
     console.log(`Permission ${state}`);
   }
-  function formatDateTime(date) {
-    function padFormat(number) {
-      return String(number).padStart(2, "0");
-    }
-    return `${padFormat(date.getDate())}/${padFormat(
-      date.getMonth()
-    )}/${date.getFullYear()} - ${
-      weekday[new Date(weather.location.localtime).getDay()]
-    } - ${padFormat(date.getHours())}:${padFormat(date.getMinutes())}`;
-  }
 
-  const weekday = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ];
   return (
     <>
       <div>
-        <div>
-          {weather && (
-            <>
-              <WeatherIcon weather={weather.current} size="64" />
-              <p>{weather.current.feelslike_c}ºC</p>
-              <p>{weather.current.feelslike_f}ºF</p>
-              <p>
-                {weather.location.name} - {weather.location.country}
-              </p>
-              <p>{formatDateTime(date)}</p>
-              <p>{weather.current.condition.text}</p>
-              <p>Umidade em {weather.current.humidity}%</p>
-              <p>Precipitação {weather.current.precip_mm}mm</p>
-            </>
-          )}
-        </div>
+        {selectedWeather && <SelectedWeather weather={selectedWeather} />}
       </div>
     </>
   );

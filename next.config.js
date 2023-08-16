@@ -2,7 +2,7 @@
 const nextConfig = {
   images: {
     loader: "custom",
-    loaderFile: "./weatherLoader.js",
+    loaderFile: "./src/actions/helpers/weatherLoader.js",
   },
 };
 
